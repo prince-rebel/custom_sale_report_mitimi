@@ -180,10 +180,11 @@ try {
 
     Log "Mise a jour du module dans Odoo (base $DbName)"
     $old = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
-    & $Python $OdooBin -c $OdooConf -d $DbName -u $ModuleName --stop-after-init --no-http 2>&1 |
-        Tee-Object -FilePath $LogFile | Out-Null
+    # --logfile : Odoo ecrit son journal dans ce fichier (la sortie console est vide)
+    & $Python $OdooBin -c $OdooConf -d $DbName -u $ModuleName --stop-after-init --no-http "--logfile=$LogFile" 2>&1 | Out-Null
     $code = $LASTEXITCODE
     $ErrorActionPreference = $old
+    if (-not (Test-Path $LogFile)) { throw "Journal Odoo introuvable : $LogFile" }
     $hasErrors = [bool](Select-String -Path $LogFile -Pattern 'CRITICAL|Failed to load registry|Traceback' -Quiet)
     if ($code -ne 0 -or $hasErrors) { $failed = $true }
 }
@@ -199,6 +200,8 @@ if ($failed) {
     Start-Odoo
     Log "Ancien module remis en place, service redemarre. Journal : $LogFile"
     Log "Envoyez ce journal pour diagnostic. Dump de la base : $Backup\base.dump"
+    Log "ATTENTION : si le journal montre que la mise a jour a abouti malgre tout, relancez le script"
+    Log "pour remettre la nouvelle version (le module restaure peut etre en retard sur la base)."
     exit 1
 }
 
