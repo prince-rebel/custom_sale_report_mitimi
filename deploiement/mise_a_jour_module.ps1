@@ -7,10 +7,10 @@
   dans Odoo et redemarre le service. En cas d'echec, l'ancien module est restaure.
 
 .EXAMPLE
-  .\mise_a_jour_module.ps1                        # derniere version taguee du depot GitHub
-  .\mise_a_jour_module.ps1 -Tag v1.2.0            # une version precise
-  .\mise_a_jour_module.ps1 -FromFolder C:\temp\custom_sale_report_mitimi   # sans GitHub (dossier copie a la main)
-  .\mise_a_jour_module.ps1 -Rollback              # revient a la derniere sauvegarde
+  .\mise_a_jour_module.ps1 -DbName ma_base                  # derniere version taguee du depot GitHub
+  .\mise_a_jour_module.ps1 -DbName ma_base -Tag v1.2.0      # une version precise
+  .\mise_a_jour_module.ps1 -DbName ma_base -FromFolder C:\temp\custom_sale_report_mitimi   # sans GitHub
+  .\mise_a_jour_module.ps1 -DbName ma_base -Rollback        # revient a la derniere sauvegarde
 
   A lancer dans PowerShell "Executer en tant qu'administrateur".
   Prerequis pour le mode GitHub : Git for Windows installe + cle de deploiement (lecture seule).
@@ -20,7 +20,8 @@ param(
     [string]$Tag,
     [string]$FromFolder,
     [switch]$Rollback,
-    [switch]$SkipDbBackup
+    [switch]$SkipDbBackup,
+    [string]$DbName                 # nom de la base Odoo (sinon db_name de odoo.conf)
 )
 
 $ErrorActionPreference = 'Stop'
@@ -34,7 +35,6 @@ $Python       = Join-Path $OdooRoot 'python\python.exe'
 $OdooBin      = Join-Path $OdooRoot 'server\odoo-bin'
 $OdooConf     = Join-Path $OdooRoot 'server\odoo.conf'
 $OdooService  = 'odoo-server-19.0'
-$DbName       = 'mitmi'                                       # vide = db_name de odoo.conf
 $PgDump       = Join-Path $OdooRoot 'PostgreSQL\bin\pg_dump.exe'
 $WorkDir      = 'C:\Deploiement\mitimi'
 $DeployKey    = Join-Path $WorkDir 'deploy_key'               # cle privee SSH, lecture seule
@@ -72,7 +72,7 @@ function Invoke-Git {
 
 function Copy-Module([string]$From, [string]$To) {
     New-Item -ItemType Directory -Force -Path $To | Out-Null
-    robocopy $From $To /MIR /XD .git __pycache__ /XF *.pyc /NFL /NDL /NJH /NJS /NP | Out-Null
+    robocopy $From $To /MIR /XD .git __pycache__ deploiement /XF *.pyc /NFL /NDL /NJH /NJS /NP | Out-Null
     if ($LASTEXITCODE -ge 8) { throw "robocopy a echoue (code $LASTEXITCODE)" }
     $global:LASTEXITCODE = 0
 }
@@ -98,7 +98,7 @@ foreach ($p in @($AddonsPath, $Python, $OdooBin, $OdooConf)) {
     if (-not (Test-Path $p)) { throw "Introuvable : $p (corrigez la section CONFIGURATION)" }
 }
 if (-not $DbName) { $DbName = Get-OdooConf 'db_name' }
-if (-not $DbName) { throw "Nom de base inconnu : renseignez `$DbName dans la section CONFIGURATION." }
+if (-not $DbName) { throw "Nom de base inconnu : ajoutez -DbName nom_de_la_base." }
 New-Item -ItemType Directory -Force -Path $WorkDir, $BackupRoot | Out-Null
 
 # ---------- Retour arriere ----------
