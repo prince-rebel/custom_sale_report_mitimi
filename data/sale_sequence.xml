@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+    Numérotation des devis : MTM-COPF-AANNN (ex. MTM-COPF-26001 = 1re cotation de 2026)
+    Année sur 2 chiffres + compteur annuel sur 3 chiffres, qui repart à 001 chaque année.
+    -->
+    <function model="ir.sequence" name="write">
+        <value model="ir.sequence" search="[('code', '=', 'sale.order')]"/>
+        <value eval="{'prefix': 'MTM-COPF-%(range_y)s', 'padding': 3, 'use_date_range': True}"/>
+    </function>
+</odoo>

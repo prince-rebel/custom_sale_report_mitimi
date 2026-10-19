@@ -1,0 +1,251 @@
+/* Styles pour le rapport de devis MITIMI CONSULTING */
+
+.mitimi-report {
+    font-family: 'Helvetica', 'Arial', sans-serif;
+    color: #333;
+
+    /* En-tête */
+    .mitimi-header {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+
+        .mitimi-slogan {
+            color: #00a99d;
+            font-size: 12px;
+            font-style: italic;
+            display: block;
+            margin-top: 10px;
+        }
+    }
+
+    /* Section titre DEVIS */
+    .mitimi-title-section {
+        background: linear-gradient(to right, #0066cc 75%, #00a99d 25%);
+        padding: 15px 20px;
+        margin: 20px 0;
+
+        .mitimi-title {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            text-align: left;
+        }
+    }
+
+    /* Section informations */
+    .mitimi-info-section {
+        margin-bottom: 20px;
+
+        .mitimi-box {
+            border: 2px solid #0066cc;
+            padding: 15px;
+            min-height: 120px;
+
+            p {
+                margin: 5px 0;
+                font-size: 11px;
+            }
+
+            strong {
+                font-weight: 600;
+            }
+        }
+
+        .mitimi-client-box {
+            background-color: #f8f9fa;
+
+            h4 {
+                font-size: 14px;
+                font-weight: bold;
+                margin-bottom: 10px;
+                color: #0066cc;
+            }
+        }
+    }
+
+    /* Section objet */
+    .mitimi-object-section {
+        margin: 20px 0;
+        padding: 10px 0;
+        border-bottom: 1px solid #ddd;
+
+        p {
+            margin: 5px 0;
+            font-size: 12px;
+        }
+    }
+
+    /* Tableau des lignes */
+    .mitimi-table-section {
+        margin: 20px 0;
+
+        .mitimi-table {
+            border: 1px solid #ddd;
+            font-size: 11px;
+
+            thead {
+                .mitimi-table-header {
+                    background-color: #0066cc;
+                    color: white;
+
+                    th {
+                        padding: 10px 8px;
+                        font-weight: 600;
+                        border: none;
+                    }
+                }
+            }
+
+            tbody {
+                .mitimi-category-row {
+                    background-color: #e6f2ff;
+
+                    td {
+                        padding: 8px;
+                        font-weight: bold;
+                        color: #0066cc;
+                    }
+                }
+
+                .mitimi-line-row {
+                    td {
+                        padding: 8px;
+                        border-bottom: 1px solid #eee;
+                        vertical-align: top;
+                    }
+                }
+
+                .mitimi-subtotal-row {
+                    background-color: #f5f5f5;
+
+                    td {
+                        padding: 10px 8px;
+                        font-weight: 600;
+                        border-top: 2px solid #ddd;
+                    }
+                }
+            }
+        }
+    }
+
+    /* Section totaux */
+    .mitimi-totals-section {
+        margin: 30px 0;
+        float: right;
+        width: 60%;
+
+        .mitimi-totals-table {
+            width: 100%;
+            margin-bottom: 0;
+
+            tr {
+                td {
+                    padding: 8px 15px;
+                    border: 1px solid #ddd;
+                    font-size: 12px;
+                }
+
+                .mitimi-total-label {
+                    background-color: #f8f9fa;
+                    font-weight: 600;
+                    text-align: left;
+                    width: 70%;
+                }
+
+                .mitimi-total-value {
+                    text-align: right;
+                    width: 30%;
+                }
+
+                .mitimi-tva {
+                    background-color: #f8f9fa;
+                }
+
+                .mitimi-total-label-ttc {
+                    background-color: #0066cc;
+                    color: white;
+                    font-weight: bold;
+                    text-align: left;
+                    width: 70%;
+                }
+
+                .mitimi-total-value-ttc {
+                    background-color: #000;
+                    color: white;
+                    font-weight: bold;
+                    text-align: right;
+                    width: 30%;
+                }
+            }
+        }
+    }
+
+    /* Montant en lettres */
+    .mitimi-amount-words {
+        clear: both;
+        margin: 30px 0 20px 0;
+        padding: 10px 0;
+        border-bottom: 1px solid #ddd;
+
+        p {
+            margin: 5px 0;
+            font-size: 11px;
+        }
+    }
+
+    /* Termes et conditions */
+    .mitimi-terms-section {
+        border: 2px solid #ddd;
+        padding: 20px;
+        margin: 20px 0;
+        background-color: #fafafa;
+
+        h4 {
+            font-size: 13px;
+            margin-bottom: 15px;
+            color: #0066cc;
+        }
+
+        p {
+            margin: 8px 0;
+            font-size: 11px;
+
+            strong {
+                font-weight: 600;
+            }
+        }
+
+        .mitimi-warranty {
+            color: #d9534f;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    }
+
+    /* Pied de page */
+    .mitimi-footer {
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 3px solid #0066cc;
+        font-size: 9px;
+
+        p {
+            margin: 3px 0;
+            line-height: 1.4;
+        }
+    }
+}
+
+/* Responsive adjustments */
+@media print {
+    .mitimi-report {
+        .mitimi-totals-section {
+            page-break-inside: avoid;
+        }
+
+        .mitimi-terms-section {
+            page-break-inside: avoid;
+        }
+    }
+}

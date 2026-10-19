@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+    ══════════════════════════════════════════════════════════════════════
+    FORMULAIRE POPUP — Saisie des coûts MITIMI par ligne
+    ══════════════════════════════════════════════════════════════════════
+    -->
+    <record id="view_mitimi_sale_order_line_cost_form" model="ir.ui.view">
+        <field name="name">sale.order.line.form.mitimi.cost.popup</field>
+        <field name="model">sale.order.line</field>
+        <field name="arch" type="xml">
+            <form string="Fiche Affaire — Détails de la ligne">
+
+                <!-- order_id requis par Odoo 19 — toujours inclus -->
+                <field name="order_id" invisible="1"/>
+
+                <group string="Produit / Prestation" col="2">
+                    <field name="product_id"/>
+                    <field name="mitimi_category"/>
+                    <field name="name" widget="text" colspan="2"/>
+                    <field name="product_uom_qty"/>
+                </group>
+
+                <group string="Données d'achat fournisseur" col="2">
+                    <group>
+                        <field name="mitimi_supplier"/>
+                        <field name="mitimi_currency_type"/>
+                        <field name="mitimi_purchase_price"
+                               help="Colonne K — P.U. Achat Fournisseur"/>
+                        <field name="mitimi_supplier_discount"
+                               widget="percentage"
+                               help="Colonne L — Remise accordée par le fournisseur"/>
+                    </group>
+                    <group>
+                        <field name="mitimi_fap_rate"
+                               widget="percentage"
+                               help="Colonne N — Frais d'Approche (%)"/>
+                        <field name="mitimi_margin_target"
+                               widget="percentage"
+                               help="Colonne R — Marge Brute Souhaitée (%)"/>
+                    </group>
+                </group>
+
+                <group string="Résultats calculés (Fiche Affaire)" col="2">
+                    <group>
+                        <field name="mitimi_purchase_price_net" readonly="1"
+                               help="Colonne M = K*(1-L)*taux"/>
+                        <field name="mitimi_fap_amount"         readonly="1"
+                               help="Colonne O = M*N"/>
+                        <field name="mitimi_cost_price"         readonly="1"
+                               help="Colonne P = M+O  (P.U. Revient)"/>
+                        <field name="mitimi_cost_total"         readonly="1"
+                               help="Colonne Q = P*D  (P.T. Revient)"/>
+                    </group>
+                    <group>
+                        <field name="price_unit"
+                               help="Colonne E = P/(1-R) — calculé auto, modifiable"/>
+                        <field name="price_subtotal"            readonly="1"
+                               help="Colonne F = D*E  (Prix Total devis)"/>
+                        <field name="mitimi_margin_amount"      readonly="1"
+                               help="Colonne S = F-Q  (Marge Brute)"/>
+                        <field name="mitimi_real_margin_rate"   readonly="1"
+                               widget="percentage"
+                               help="Colonne T = S/F  (Taux Marge Réelle)"/>
+                    </group>
+                </group>
+
+                <!-- PAS de <footer> : Odoo 19 gère nativement Enregistrer/Annuler -->
+
+            </form>
+        </field>
+    </record>
+
+    <!--
+    ══════════════════════════════════════════════════════════════════════
+    EXTENSION du formulaire sale.order
+    ══════════════════════════════════════════════════════════════════════
+    -->
+    <record id="mitimi_sale_order_form_view" model="ir.ui.view">
+        <field name="name">sale.order.form.mitimi</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- mitimi_objet affiché directement après partner_id -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="mitimi_objet" placeholder="Objet du devis..."/>
+            </xpath>
+
+            <!-- Remplace order_line par la version avec popup MITIMI -->
+            <xpath expr="//field[@name='order_line']" position="replace">
+                <field name="order_line"
+                       form_view_ref="custom_sale_report_mitimi.view_mitimi_sale_order_line_cost_form">
+                    <list string="Lignes de commande">
+                        <field name="sequence" widget="handle"/>
+                        <field name="product_id"
+                               domain="[('sale_ok', '=', True)]"
+                               context="{'partner_id': parent.partner_id, 'quantity': product_uom_qty, 'pricelist': parent.pricelist_id}"/>
+                        <field name="name" optional="show"/>
+                        <field name="mitimi_category" optional="show"/>
+                        <field name="product_uom_qty"/>
+                        <field name="price_unit"
+                               help="Calculé automatiquement depuis le coût + marge. Modifiable manuellement."/>
+                        <field name="tax_ids" optional="hide" widget="many2many_tags"/>
+                        <field name="mitimi_cost_price"       readonly="1" optional="show"
+                               string="P.U. Revient"/>
+                        <field name="mitimi_real_margin_rate" readonly="1" optional="show"
+                               string="Marge réelle"         widget="percentage"/>
+                        <field name="price_subtotal"          readonly="1"/>
+                        <button name="action_mitimi_cost_detail"
+                                type="object"
+                                icon="fa-calculator"
+                                title="Saisir / voir les données de coût MITIMI"
+                                class="btn-sm"/>
+                    </list>
+                </field>
+            </xpath>
+
+            <!-- Onglet paramètres globaux MITIMI -->
+            <xpath expr="//notebook" position="inside">
+                <page string="MITIMI — Configuration" name="mitimi_config">
+                    <group string="Taux de change" col="2">
+                        <field name="mitimi_rate_usd"/>
+                        <field name="mitimi_rate_euro"/>
+                    </group>
+                    <group string="Informations du devis" col="2">
+                        <field name="mitimi_validity_label"/>
+                    </group>
+                    <group string="Fiscalité" col="2">
+                        <field name="mitimi_remise"   widget="percentage"/>
+                    </group>
+                    <group string="Termes et conditions" col="2">
+                        <field name="mitimi_delivery_licence"/>
+                        <field name="mitimi_delivery_project"/>
+                        <field name="mitimi_payment_conditions"/>
+                        <field name="mitimi_payment_method"/>
+                        <field name="mitimi_warranty"/>
+                    </group>
+                    <group string="Fiche Affaire — Postes globaux" col="2">
+                        <field name="mitimi_commission"/>
+                        <field name="mitimi_provision"/>
+                    </group>
+                    <group string="Résultats calculés" col="2">
+                        <field name="mitimi_total_ht"         readonly="1"/>
+                        <field name="mitimi_remise_amount"    readonly="1"/>
+                        <field name="mitimi_total_ht_remise"  readonly="1"/>
+                        <field name="mitimi_tva_amount"       readonly="1"/>
+                        <field name="mitimi_total_ttc"        readonly="1"/>
+                        <separator/>
+                        <field name="mitimi_total_cost"       readonly="1"/>
+                        <field name="mitimi_marge_brute"      readonly="1"/>
+                        <field name="mitimi_taux_marge"       readonly="1" widget="percentage"/>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

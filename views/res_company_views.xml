@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mitimi_res_company_form_view" model="ir.ui.view">
+        <field name="name">res.company.form.mitimi</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_registry']" position="after">
+                <field name="mitimi_footer_text" placeholder="MITIMI CONSULTING au capital de ...&#10;Adresse ...&#10;E-mail : ... ; RCCM ... CC ...&#10;N° Comptes : ..."/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

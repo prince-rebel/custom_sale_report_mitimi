@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_mitimi_fiche_affaire" model="ir.actions.report">
+        <field name="name">Fiche Affaire MITIMI</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">custom_sale_report_mitimi.report_mitimi_fiche_affaire_document</field>
+        <field name="report_file">custom_sale_report_mitimi.report_mitimi_fiche_affaire_document</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Fiche Affaire %s' % (object.name,)</field>
+    </record>
+
+    <template id="report_mitimi_fiche_affaire_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-size:11px;">
+
+                        <h5 class="fw-bold text-center mb-2" style="color:#1a3c5e;text-transform:uppercase;">
+                            Fiche Affaire — Calcul du Prix de Revient et des Marges
+                        </h5>
+                        <p class="text-muted text-center mb-3" style="font-size:10px;font-style:italic;">
+                            Document confidentiel — Usage interne uniquement
+                        </p>
+
+                        <div class="row mb-2" style="font-size:11px;">
+                            <div class="col-8">
+                                <strong>Devis N° :</strong> <t t-esc="doc.name"/>&#160;|&#160;
+                                <strong>Client :</strong> <t t-esc="doc.partner_id.name"/>
+                                <t t-if="doc.mitimi_objet">&#160;|&#160;<strong>Objet :</strong> <t t-esc="doc.mitimi_objet"/></t>
+                            </div>
+                            <div class="col-4 text-end" style="color:#555;font-size:10px;">
+                                1 USD = <t t-esc="doc.mitimi_rate_usd"/> FCFA&#160;|&#160;
+                                1 EURO = <t t-esc="doc.mitimi_rate_euro"/> FCFA
+                            </div>
+                        </div>
+
+                        <table class="table table-sm table-bordered" style="font-size:9.5px;border-collapse:collapse;">
+                            <thead>
+                                <tr style="background-color:#1a3c5e;color:white;">
+                                    <th style="padding:4px;">Description</th>
+                                    <th class="text-center" style="padding:4px;">Devise</th>
+                                    <th class="text-center" style="padding:4px;">Catégorie</th>
+                                    <th class="text-end"    style="padding:4px;">P.U. Achat Frs (K)</th>
+                                    <th class="text-end"    style="padding:4px;">Remise Frs (L)</th>
+                                    <th class="text-end"    style="padding:4px;">P.U. Net FCFA (M)</th>
+                                    <th class="text-end"    style="padding:4px;">FAP % (N)</th>
+                                    <th class="text-end"    style="padding:4px;">Mt FAP (O)</th>
+                                    <th class="text-end"    style="padding:4px;">P.U. Revient (P)</th>
+                                    <th class="text-end"    style="padding:4px;">P.T. Revient (Q)</th>
+                                    <th class="text-end"    style="padding:4px;">Marge % (R)</th>
+                                    <th class="text-end"    style="padding:4px;">Mt Marge (S)</th>
+                                    <th class="text-end"    style="padding:4px;">Marge Réelle (T)</th>
+                                    <th style="padding:4px;">Fournisseur</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.order_line" t-as="line">
+                                    <tr>
+                                        <td style="padding:3px 4px;"><t t-esc="line.name"/></td>
+                                        <td class="text-center" style="padding:3px 4px;"><t t-esc="line.mitimi_currency_type or 'FCFA'"/></td>
+                                        <td class="text-center" style="padding:3px 4px;"><t t-esc="line.mitimi_category or '—'"/></td>
+                                        <td class="text-end" style="padding:3px 4px;"><t t-esc="'{:,.2f}'.format(line.mitimi_purchase_price or 0)"/></td>
+                                        <td class="text-end" style="padding:3px 4px;"><t t-esc="'%.0f' % (line.mitimi_supplier_discount*100)"/>&#160;%</td>
+                                        <td class="text-end" style="padding:3px 4px;"><t t-esc="'{:,.0f}'.format(line.mitimi_purchase_price_net or 0)"/></td>
+                                        <td class="text-end" style="padding:3px 4px;"><t t-esc="'%.0f' % (line.mitimi_fap_rate*100)"/>&#160;%</td>
+                                        <td class="text-end" style="padding:3px 4px;"><t t-esc="'{:,.0f}'.format(line.mitimi_fap_amount or 0)"/></td>
+                                        <td class="text-end fw-bold" style="padding:3px 4px;"><t t-esc="'{:,.0f}'.format(line.mitimi_cost_price or 0)"/></td>
+                                        <td class="text-end fw-bold" style="padding:3px 4px;"><t t-esc="'{:,.0f}'.format(line.mitimi_cost_total or 0)"/></td>
+                                        <td class="text-end" style="padding:3px 4px;"><t t-esc="'%.0f' % (line.mitimi_margin_target*100)"/>&#160;%</td>
+                                        <td class="text-end" style="padding:3px 4px;"><t t-esc="'{:,.0f}'.format(line.mitimi_margin_amount or 0)"/></td>
+                                        <td class="text-end" style="padding:3px 4px;"><t t-esc="'%.1f' % (line.mitimi_real_margin_rate*100)"/>&#160;%</td>
+                                        <td style="padding:3px 4px;"><t t-esc="line.mitimi_supplier or '—'"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+
+                        <div class="row mt-3">
+                            <div class="col-6 offset-6">
+                                <table class="table table-sm mb-0" style="font-size:11px;">
+                                    <tr>
+                                        <td>Total HT client</td>
+                                        <td class="text-end fw-bold"><t t-esc="'{:,.0f}'.format(doc.mitimi_total_ht)"/> FCFA</td>
+                                    </tr>
+                                    <t t-if="doc.mitimi_remise">
+                                        <tr>
+                                            <td>Remise (<t t-esc="'%.0f' % (doc.mitimi_remise*100)"/>&#160;%)</td>
+                                            <td class="text-end">(<t t-esc="'{:,.0f}'.format(doc.mitimi_remise_amount)"/>)</td>
+                                        </tr>
+                                    </t>
+                                    <tr>
+                                        <td class="fw-bold">Total HT avec remise</td>
+                                        <td class="text-end fw-bold"><t t-esc="'{:,.0f}'.format(doc.mitimi_total_ht_remise)"/> FCFA</td>
+                                    </tr>
+                                    <t t-if="doc.mitimi_commission">
+                                        <tr>
+                                            <td>Commissions</td>
+                                            <td class="text-end"><t t-esc="'{:,.0f}'.format(doc.mitimi_commission)"/> FCFA</td>
+                                        </tr>
+                                    </t>
+                                    <t t-if="doc.mitimi_provision">
+                                        <tr>
+                                            <td>Provisions</td>
+                                            <td class="text-end"><t t-esc="'{:,.0f}'.format(doc.mitimi_provision)"/> FCFA</td>
+                                        </tr>
+                                    </t>
+                                    <tr style="background-color:#f2f2f2;">
+                                        <td class="fw-bold">PRIX DE REVIENT TOTAL</td>
+                                        <td class="text-end fw-bold"><t t-esc="'{:,.0f}'.format(doc.mitimi_total_cost)"/> FCFA</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">MARGE BRUTE</td>
+                                        <td class="text-end fw-bold"><t t-esc="'{:,.0f}'.format(doc.mitimi_marge_brute)"/> FCFA</td>
+                                    </tr>
+                                    <tr style="background-color:#1a3c5e;color:white;">
+                                        <td class="fw-bold">TAUX DE MARGE</td>
+                                        <td class="text-end fw-bold"><t t-esc="'%.1f' % (doc.mitimi_taux_marge*100)"/>&#160;%</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>
