@@ -432,9 +432,9 @@
           <!-- ════════════════════════════
                FOOTER : MENTIONS LEGALES
           ════════════════════════════ -->
-          <div style="background-color: #0D1B2A; padding: 10px 20px; text-align: center; font-size: 8.5px; color: #A0AEC0; line-height: 1.65;">
+          <div style="background-color: #0D1B2A; padding: 14px 28px; text-align: center; font-size: 10px; color: #E2E8F0; line-height: 1.8;">
             <t t-foreach="doc.company_id.mitimi_footer_lines()" t-as="footer_line">
-              <div><t t-esc="footer_line"/></div>
+              <div t-att-style="'font-size: 11px; font-weight: 700; color: #FFFFFF; letter-spacing: 0.3px;' if footer_line_first else ''"><t t-esc="footer_line"/></div>
             </t>
           </div>
           </div>
