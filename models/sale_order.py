@@ -77,18 +77,21 @@ class SaleOrder(models.Model):
             order.mitimi_taux_marge  = marge / ht_remise if ht_remise else 0.0
 
     def mitimi_tva_label(self):
-        """Libellé du taux de TVA tiré des taxes des lignes (ex. '18 %').
-        Retourne '' si aucune taxe, ou si les taux sont multiples."""
+        """Libellé du taux de TVA (ex. '18 %'), déduit du montant de TVA réel.
+        Vide si les lignes n'ont pas toutes les mêmes taxes ou s'il n'y a pas de TVA."""
         self.ensure_one()
-        rates = {
-            tax.amount
-            for tax in self.order_line.mapped('tax_ids')
-            if tax.amount_type == 'percent'
-        }
-        if len(rates) == 1:
-            rate = rates.pop()
-            return ('%g' % rate) + '\u00a0%'
+        lines = self.order_line.filtered(lambda l: not l.display_type)
+        tax_sets = {frozenset(l.tax_ids.ids) for l in lines}
+        if len(tax_sets) == 1 and self.amount_untaxed and self.amount_tax:
+            rate = round(self.amount_tax / self.amount_untaxed * 100, 2)
+            if rate:
+                return ('%g' % rate) + '\u00a0%'
         return ''
+
+    def mitimi_show_uom(self):
+        """Vrai si au moins une ligne a une unité de mesure (sinon la colonne est masquée)."""
+        self.ensure_one()
+        return any(l.product_uom_id for l in self.order_line if not l.display_type)
 
     def mitimi_lines_by_category(self):
         """Retourne les lignes groupées par catégorie pour les rapports PDF."""

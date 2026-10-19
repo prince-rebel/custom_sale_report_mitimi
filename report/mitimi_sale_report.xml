@@ -232,13 +232,15 @@
           <!-- ════════════════════════════
                TABLEAU DES LIGNES
           ════════════════════════════ -->
+          <t t-set="show_uom" t-value="doc.mitimi_show_uom()"/>
+          <t t-set="ncols" t-value="7 if show_uom else 6"/>
           <div style="padding: 0 20px;">
           <table style="width:100%; border-collapse: collapse; font-size: 12px;">
             <colgroup>
               <col style="width: 30px;"/>
               <col style="width: 130px;"/>
               <col/>
-              <col style="width: 48px;"/>
+              <col t-if="show_uom" style="width: 48px;"/>
               <col style="width: 32px;"/>
               <col style="width: 105px;"/>
               <col style="width: 105px;"/>
@@ -248,7 +250,7 @@
                 <th style="color:#fff; font-size:9.5px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; padding:10px 8px; text-align:center; white-space:nowrap; border:none;">N&#176;</th>
                 <th style="color:#fff; font-size:9.5px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; padding:10px 8px; text-align:left; white-space:nowrap; border:none;">D&#233;signation</th>
                 <th style="color:#fff; font-size:9.5px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; padding:10px 8px; text-align:left; white-space:nowrap; border:none;">D&#233;tail / Description</th>
-                <th style="color:#fff; font-size:9.5px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; padding:10px 8px; text-align:center; white-space:nowrap; border:none;">Unit&#233;</th>
+                <th t-if="show_uom" style="color:#fff; font-size:9.5px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; padding:10px 8px; text-align:center; white-space:nowrap; border:none;">Unit&#233;</th>
                 <th style="color:#fff; font-size:9.5px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; padding:10px 8px; text-align:center; white-space:nowrap; border:none;">Qt&#233;</th>
                 <th style="color:#fff; font-size:9.5px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; padding:10px 8px; text-align:center; white-space:nowrap; border:none;">P.U. HT</th>
                 <th style="color:#fff; font-size:9.5px; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; padding:10px 8px; text-align:center; white-space:nowrap; border:none;">Montant HT</th>
@@ -259,14 +261,14 @@
               <t t-foreach="doc.order_line" t-as="line">
                 <t t-if="line.display_type == 'line_section'">
                   <tr style="page-break-inside: avoid;">
-                    <td colspan="7" style="padding:9px 8px; background-color:#E3F6F9; color:#005F6B; font-weight:700; font-size:11.5px; letter-spacing:0.5px; border-bottom:1px solid #D8EFF3;">
+                    <td t-att-colspan="ncols" style="padding:9px 8px; background-color:#E3F6F9; color:#005F6B; font-weight:700; font-size:11.5px; letter-spacing:0.5px; border-bottom:1px solid #D8EFF3;">
                       <t t-esc="line.name"/>
                     </td>
                   </tr>
                 </t>
                 <t t-elif="line.display_type == 'line_note'">
                   <tr style="page-break-inside: avoid;">
-                    <td colspan="7" style="padding:8px 8px; color:#4A5568; font-style:italic; font-size:11px; border-bottom:1px solid #D8EFF3;">
+                    <td t-att-colspan="ncols" style="padding:8px 8px; color:#4A5568; font-style:italic; font-size:11px; border-bottom:1px solid #D8EFF3;">
                       <t t-esc="line.name"/>
                     </td>
                   </tr>
@@ -291,7 +293,7 @@
                   <td t-att-colspan="1 if line.product_id else 2" t-att-style="'padding:12px 8px; text-align:left; color:#4A5568; font-size:11.5px; line-height:1.6; vertical-align:middle; background-color:' + row_bg">
                     <t t-esc="line.name"/>
                   </td>
-                  <td t-att-style="'padding:12px 8px; text-align:center; vertical-align:middle; font-size:11.5px; background-color:' + row_bg">
+                  <td t-if="show_uom" t-att-style="'padding:12px 8px; text-align:center; vertical-align:middle; font-size:11.5px; background-color:' + row_bg">
                     <t t-esc="line.product_uom_id.name if line.product_uom_id else ''"/>
                   </td>
                   <td t-att-style="'padding:12px 8px; text-align:center; vertical-align:middle; font-size:11.5px; background-color:' + row_bg">
