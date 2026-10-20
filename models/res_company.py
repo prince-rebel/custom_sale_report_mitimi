@@ -17,7 +17,7 @@ MITIMI_FOOTER_DEFAULT = (
     "Email : contact@mitimi-consulting.com, Site : www.mitimi-consulting.com"
 )
 PREFILL_PARAM = 'custom_sale_report_mitimi.footer_prefilled'
-PREFILL_BANKS_PARAM = 'custom_sale_report_mitimi.banks_prefilled'
+PREFILL_BANKS_PARAM = 'custom_sale_report_mitimi.banks_prefilled_v2'
 
 # Comptes bancaires créés une seule fois sur la société (modifiables dans Contacts > Facturation).
 MITIMI_BANKS = [
@@ -60,15 +60,18 @@ class ResCompany(models.Model):
         """Crée les comptes bancaires de la société s'ils n'existent pas déjà."""
         self.ensure_one()
         partner = self.partner_id
-        existing = {(b.acc_number or '').replace(' ', '').upper() for b in partner.bank_ids}
+        existing = {(b.acc_number or '').replace(' ', '').upper(): b for b in partner.bank_ids}
         Bank = self.env['res.bank'].sudo()
         country = self.env['res.country'].search([('code', '=', 'CI')], limit=1)
         for bank_name, acc_number in MITIMI_BANKS:
-            if acc_number.replace(' ', '').upper() in existing:
-                continue
             bank = Bank.search([('name', '=ilike', bank_name)], limit=1)
             if not bank:
                 bank = Bank.create({'name': bank_name, 'country': country.id or False})
+            acc = existing.get(acc_number.replace(' ', '').upper())
+            if acc:
+                if not acc.bank_id:
+                    acc.sudo().write({'bank_id': bank.id})
+                continue
             self.env['res.partner.bank'].sudo().create({
                 'acc_number': acc_number,
                 'partner_id': partner.id,
@@ -79,7 +82,11 @@ class ResCompany(models.Model):
         """'N° Compte : BANQUE (numéro) - BANQUE (numéro)' d'après les comptes de la société."""
         self.ensure_one()
         banks = []
-        for b in self.partner_id.bank_ids:
+        order = [a.replace(' ', '').upper() for _n, a in MITIMI_BANKS]
+        def _key(b):
+            n = (b.acc_number or '').replace(' ', '').upper()
+            return order.index(n) if n in order else len(order)
+        for b in self.partner_id.bank_ids.sorted(_key):
             if not b.acc_number:
                 continue
             name = b.bank_id.name
