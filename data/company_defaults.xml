@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Pré-remplit une seule fois les mentions légales du pied de page (modifiables ensuite). -->
+    <function model="res.company" name="_mitimi_prefill_defaults"/>
+</odoo>

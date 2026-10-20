@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Custom Sale Report - MITIMI Style',
-    'version': '19.0.1.1.6',
+    'version': '19.0.1.1.7',
     'category': 'Sales',
     'summary': 'Personnalisation du rapport de devis/commande style MITIMI CONSULTING',
     'description': """
@@ -25,6 +25,7 @@
         # 'report/sale_report_templates.xml',
         'data/sale_sequence.xml',
         'views/res_company_views.xml',
+        'data/company_defaults.xml',
         'views/sale_order_views.xml',
         'report/mitimi_sale_report.xml',
         'report/mitimi_fiche_affaire.xml',
