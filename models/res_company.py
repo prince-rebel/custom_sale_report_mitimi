@@ -26,13 +26,8 @@ class ResCompany(models.Model):
         ) if p)
         if address:
             lines.append(address)
-        contact = []
-        if self.phone:
-            contact.append('Tél : %s' % self.phone)
         if self.email:
-            contact.append('E-mail : %s' % self.email)
-        if contact:
-            lines.append(' ; '.join(contact))
+            lines.append('E-mail : %s' % self.email)
         legal = []
         if self.company_registry:
             legal.append(self.company_registry)
