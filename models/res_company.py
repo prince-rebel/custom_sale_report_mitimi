@@ -18,27 +18,36 @@ class ResCompany(models.Model):
         if self.mitimi_footer_text:
             return [l.strip() for l in self.mitimi_footer_text.splitlines() if l.strip()]
         partner = self.partner_id
-        lines = [self.name or '']
-        address = ', '.join(p for p in (
+        # Ligne 1 : société + adresse
+        address = ', '.join(x for x in (
             partner.street, partner.street2,
-            ' '.join(x for x in (partner.zip, partner.city) if x),
+            ' '.join(y for y in (partner.zip, partner.city) if y),
             partner.country_id.name,
-        ) if p)
-        if address:
-            lines.append(address)
-        if self.email:
-            lines.append('E-mail : %s' % self.email)
+        ) if x)
+        lines = [' - '.join(x for x in (self.name, address) if x)]
+        # Ligne 2 : registre de commerce et compte contribuable
         legal = []
         if self.company_registry:
-            legal.append(self.company_registry)
+            legal.append('Registre de commerce : %s' % self.company_registry)
         if self.vat:
             legal.append('CC %s' % self.vat)
         if legal:
-            lines.append(' '.join(legal))
-        banks = [
-            '%s : %s' % (b.bank_id.name or 'Banque', b.acc_number)
-            for b in partner.bank_ids if b.acc_number
-        ]
+            lines.append(' - '.join(legal))
+        # Ligne 3 : comptes bancaires de la société (Contacts > société > Coordonnées bancaires)
+        banks = []
+        for b in partner.bank_ids:
+            if not b.acc_number:
+                continue
+            name = b.bank_id.name
+            banks.append('%s (%s)' % (name, b.acc_number) if name else b.acc_number)
         if banks:
-            lines.append('N° Comptes : ' + ' ; '.join(banks))
+            lines.append('N° Compte : ' + ' - '.join(banks))
+        # Ligne 4 : e-mail et site
+        contact = []
+        if self.email:
+            contact.append('Email : %s' % self.email)
+        if self.website:
+            contact.append('Site : %s' % self.website)
+        if contact:
+            lines.append(', '.join(contact))
         return lines
