@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from odoo import api, fields, models
+
+_logger = logging.getLogger(__name__)
 
 # Texte proposé une seule fois à l'installation (modifiable ensuite dans la fiche société).
 # La ligne {comptes} est remplacée par les comptes bancaires saisis dans Odoo
@@ -13,6 +17,13 @@ MITIMI_FOOTER_DEFAULT = (
     "Email : contact@mitimi-consulting.com, Site : www.mitimi-consulting.com"
 )
 PREFILL_PARAM = 'custom_sale_report_mitimi.footer_prefilled'
+PREFILL_BANKS_PARAM = 'custom_sale_report_mitimi.banks_prefilled'
+
+# Comptes bancaires créés une seule fois sur la société (modifiables dans Contacts > Facturation).
+MITIMI_BANKS = [
+    ('MANSA BANQUE', 'CI211 01001 000100610684 38'),
+    ("FINANCIA CÔTE D'IVOIRE", 'CI201 01001 110958854290 77'),
+]
 
 
 class ResCompany(models.Model):
@@ -27,14 +38,42 @@ class ResCompany(models.Model):
 
     @api.model
     def _mitimi_prefill_defaults(self):
-        """Pré-remplit les mentions légales une seule fois (ne réécrit jamais une modification)."""
+        """Pré-remplit une seule fois les mentions légales et les comptes bancaires.
+        Ne réécrit jamais une modification faite ensuite dans Odoo."""
         icp = self.env['ir.config_parameter'].sudo()
-        if icp.get_param(PREFILL_PARAM):
-            return
-        for company in self.sudo().search([('name', 'ilike', 'MITIMI')]):
-            if not company.mitimi_footer_text:
-                company.mitimi_footer_text = MITIMI_FOOTER_DEFAULT
-        icp.set_param(PREFILL_PARAM, '1')
+        companies = self.sudo().search([('name', 'ilike', 'MITIMI')])
+        if not icp.get_param(PREFILL_PARAM):
+            for company in companies:
+                if not company.mitimi_footer_text:
+                    company.mitimi_footer_text = MITIMI_FOOTER_DEFAULT
+            icp.set_param(PREFILL_PARAM, '1')
+        if not icp.get_param(PREFILL_BANKS_PARAM):
+            try:
+                with self.env.cr.savepoint():
+                    for company in companies:
+                        company._mitimi_create_banks()
+                icp.set_param(PREFILL_BANKS_PARAM, '1')
+            except Exception:  # ne jamais bloquer la mise à jour du module
+                _logger.exception("custom_sale_report_mitimi : comptes bancaires non pré-remplis")
+
+    def _mitimi_create_banks(self):
+        """Crée les comptes bancaires de la société s'ils n'existent pas déjà."""
+        self.ensure_one()
+        partner = self.partner_id
+        existing = {(b.acc_number or '').replace(' ', '').upper() for b in partner.bank_ids}
+        Bank = self.env['res.bank'].sudo()
+        country = self.env['res.country'].search([('code', '=', 'CI')], limit=1)
+        for bank_name, acc_number in MITIMI_BANKS:
+            if acc_number.replace(' ', '').upper() in existing:
+                continue
+            bank = Bank.search([('name', '=ilike', bank_name)], limit=1)
+            if not bank:
+                bank = Bank.create({'name': bank_name, 'country': country.id or False})
+            self.env['res.partner.bank'].sudo().create({
+                'acc_number': acc_number,
+                'partner_id': partner.id,
+                'bank_id': bank.id,
+            })
 
     def _mitimi_bank_line(self):
         """'N° Compte : BANQUE (numéro) - BANQUE (numéro)' d'après les comptes de la société."""

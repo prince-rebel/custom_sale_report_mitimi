@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Custom Sale Report - MITIMI Style',
-    'version': '19.0.1.1.7',
+    'version': '19.0.1.1.8',
     'category': 'Sales',
     'summary': 'Personnalisation du rapport de devis/commande style MITIMI CONSULTING',
     'description': """
