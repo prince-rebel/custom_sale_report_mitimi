@@ -74,7 +74,7 @@
               <!-- Droite : titre + n&#176; + infos -->
               <td style="padding: 20px 20px 16px 10px; vertical-align: top; text-align: right;">
                 <t t-if="doc.state in ('draft', 'sent')">
-                  <div style="font-size: 34px; font-weight: 800; color: #1A1A2E; letter-spacing: 3px; line-height: 1;">DEVIS</div>
+                  <div style="font-size: 26px; font-weight: 800; color: #1A1A2E; letter-spacing: 2px; line-height: 1;">DEVIS</div>
                 </t>
                 <t t-else="">
                   <div style="font-size: 26px; font-weight: 800; color: #1A1A2E; letter-spacing: 2px; line-height: 1.2;">BON DE COMMANDE</div>

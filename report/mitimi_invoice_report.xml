@@ -68,10 +68,10 @@
               <!-- Droite : titre + n&#176; + infos -->
               <td style="padding: 20px 20px 16px 10px; vertical-align: top; text-align: right;">
                 <t t-if="doc.move_type == 'out_refund'">
-                  <div style="font-size: 34px; font-weight: 800; color: #1A1A2E; letter-spacing: 3px; line-height: 1;">AVOIR</div>
+                  <div style="font-size: 26px; font-weight: 800; color: #1A1A2E; letter-spacing: 2px; line-height: 1;">AVOIR</div>
                 </t>
                 <t t-else="">
-                  <div style="font-size: 34px; font-weight: 800; color: #1A1A2E; letter-spacing: 3px; line-height: 1;">FACTURE</div>
+                  <div style="font-size: 26px; font-weight: 800; color: #1A1A2E; letter-spacing: 2px; line-height: 1;">FACTURE</div>
                 </t>
 
                 <div style="margin-top: 6px; background-color: #00C5D5; color: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; padding: 4px 14px; border-radius: 4px; display: inline-block;">
