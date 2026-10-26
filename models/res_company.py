@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import re
 
 from odoo import api, fields, models
 
@@ -9,8 +10,7 @@ _logger = logging.getLogger(__name__)
 # La ligne {comptes} est remplacée par les comptes bancaires saisis dans Odoo
 # (Contacts > société > Coordonnées bancaires).
 MITIMI_FOOTER_DEFAULT = (
-    "MITIMI CONSULTING au capital de 1 000 000 FCFA - COCODY II PLATEAUX 7E TRANCHE "
-    "PHARMACIE MAGNIFICAT, Lot 2977, Ilot 247\n"
+    "MITIMI CONSULTING au capital de 1 000 000 FCFA - COCODY II PLATEAUX 7E TRANCHE\n"
     "Abidjan-Côte d'Ivoire 11 BP 1556 ABIDJAN 11 \u2013 Registre de commerce : "
     "CI-ABJ-03-2024-B12-07084 - CC 2403478 Z\n"
     "{comptes}\n"
@@ -18,6 +18,7 @@ MITIMI_FOOTER_DEFAULT = (
 )
 PREFILL_PARAM = 'custom_sale_report_mitimi.footer_prefilled'
 PREFILL_BANKS_PARAM = 'custom_sale_report_mitimi.banks_prefilled_v2'
+CLEAN_ADDR_PARAM = 'custom_sale_report_mitimi.footer_addr_cleaned'
 
 # Comptes bancaires créés une seule fois sur la société (modifiables dans Contacts > Facturation).
 MITIMI_BANKS = [
@@ -47,6 +48,14 @@ class ResCompany(models.Model):
                 if not company.mitimi_footer_text:
                     company.mitimi_footer_text = MITIMI_FOOTER_DEFAULT
             icp.set_param(PREFILL_PARAM, '1')
+        if not icp.get_param(CLEAN_ADDR_PARAM):
+            # Retrait unique de « PHARMACIE MAGNIFICAT, Lot 2977, Ilot 247 » du texte déjà enregistré
+            for company in companies:
+                txt = company.mitimi_footer_text or ''
+                new = re.sub(r'\s*PHARMACIE\s*MAGNIFICAT\s*,?\s*Lot\s*2977\s*,?\s*Ilot\s*247', '', txt, flags=re.I)
+                if new != txt:
+                    company.mitimi_footer_text = new
+            icp.set_param(CLEAN_ADDR_PARAM, '1')
         if not icp.get_param(PREFILL_BANKS_PARAM):
             try:
                 with self.env.cr.savepoint():
