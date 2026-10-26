@@ -61,8 +61,8 @@
                 <table style="border-collapse:collapse;">
                   <tr>
                     <td style="vertical-align: middle;">
-                      <img t-if="doc.company_id.logo" t-att-src="image_data_uri(doc.company_id.logo)" style="height: 80px; width: auto;" alt="Logo"/>
-                      <img t-else="" src="/custom_sale_report_mitimi/static/img/logo_mitimi.png" height="80" width="133" style="height: 80px; width: 133px;" alt="Logo"/>
+                      <img t-if="doc.company_id.logo" t-att-src="image_data_uri(doc.company_id.logo)" style="width: 240px; height: auto;" alt="Logo"/>
+                      <img t-else="" src="/custom_sale_report_mitimi/static/img/logo_mitimi_horizontal.png" width="240" height="33" style="width: 240px; height: 33px;" alt="Logo"/>
                     </td>
                   </tr>
                 </table>
