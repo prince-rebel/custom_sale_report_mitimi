@@ -8,4 +8,6 @@
         <value model="ir.sequence" search="[('code', '=', 'sale.order')]"/>
         <value eval="{'prefix': 'MTM-COPF-%(range_y)s', 'padding': 3, 'use_date_range': True}"/>
     </function>
+    <!-- Le prochain devis de l'année porte le numéro 21 (une seule fois) -->
+    <function model="ir.sequence" name="_mitimi_set_quote_start"/>
 </odoo>
